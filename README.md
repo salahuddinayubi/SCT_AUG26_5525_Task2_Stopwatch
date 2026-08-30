@@ -1,57 +1,80 @@
-# Splitwatch — Precision Stopwatch
+# Splitwatch
 
-A modern, responsive stopwatch web application designed for accurate time measurement and lap tracking.
+A browser-based stopwatch with accurate timing and lap splits, styled as a
+small precision-timing instrument rather than a generic form.
 
-## Overview
+## Purpose
 
-**Splitwatch** provides a simple and user-friendly interface for measuring elapsed time, recording lap splits, and reviewing total timing data. The stopwatch calculates elapsed time using browser timestamps to reduce timing drift caused by delayed timer callbacks.
+Splitwatch measures elapsed time and records individual lap ("split") times
+directly in the browser — no build step, no server, no dependencies beyond
+two Google Fonts.
 
 ## Features
 
-* Start, pause, and resume stopwatch
-* Reset stopwatch
-* Record multiple lap times
-* Display lap split and total time
-* Identify fastest and slowest laps
-* Light and dark mode
-* Theme preference saved locally
-* Lap and stopwatch state persistence
-* Keyboard shortcuts
-* Responsive design for desktop, tablet, and mobile
-* Accessible controls and status feedback
-* User Guide built into the application
+- Start / Pause / Resume / Reset
+- Lap recording with per-lap split and running total
+- Fastest / slowest lap highlighting (once 3+ laps are recorded)
+- Timestamp-based timing — accurate even if the browser throttles callbacks
+- Light and dark themes, remembered per device
+- Keyboard shortcuts: `Space` start/pause, `L` lap, `R` reset
+- Built-in user guide (dialog)
+- Fully responsive, down to small phones
+- Accessible: semantic HTML, visible focus states, `aria-live` status
+  announcements, keyboard-operable throughout
+- Laps and elapsed time (when paused) are restored on page reload
 
-## Keyboard Shortcuts
+## Technologies used
 
-| Key     | Action                 |
-| ------- | ---------------------- |
-| `Space` | Start / Pause / Resume |
-| `L`     | Record Lap             |
-| `R`     | Reset                  |
+- HTML5
+- CSS3 (custom properties for theming, CSS Grid, no framework)
+- Vanilla JavaScript (`requestAnimationFrame`, no libraries)
 
-## How Timing Works
+No React, build tooling, or backend of any kind.
 
-The stopwatch uses `performance.now()` to calculate elapsed time instead of simply increasing a counter at fixed intervals.
+## How the stopwatch works
 
-The basic calculation is:
+Rather than incrementing a counter on every timer tick — which drifts as
+soon as the browser delays a callback — Splitwatch stores two things:
 
-```text
-elapsed time = accumulated time + current timestamp - segment start
+- `accumulatedMs`: time already banked from previous run segments
+- `segmentStart`: the `performance.now()` timestamp when the current run
+  segment began
+
+On every animation frame, elapsed time is **recomputed** as:
+
+```
+elapsed = accumulatedMs + (performance.now() - segmentStart)
 ```
 
-This approach helps maintain accurate timing even when browser rendering or callbacks are delayed.
+Pausing simply folds the current segment into `accumulatedMs` and clears
+`segmentStart`. This means the displayed time is always derived from real
+timestamps, never from a running sum of small increments, so it stays
+accurate across pauses, resumes, and any frame-rate hiccups.
 
-## Technologies Used
+Laps store both the **split** (time since the previous lap) and the
+**total** (time since Start), computed from the same elapsed-time function.
 
-* HTML5
-* CSS3
-* JavaScript
-* Browser Local Storage
-* Web APIs such as `performance.now()` and `requestAnimationFrame()`
+## How to run
 
-## Project Structure
+No build step required.
 
-```text
+```bash
+# Option 1 — just open it
+open index.html          # macOS
+start index.html         # Windows
+xdg-open index.html      # Linux
+
+# Option 2 — serve it locally (recommended for consistent font loading)
+python3 -m http.server 8000
+# then visit http://localhost:8000
+```
+
+To deploy, push the folder to a static host such as GitHub Pages, Netlify,
+or Vercel — it's plain static files.
+
+## Project structure
+
+```
 stopwatch-app/
 ├── index.html
 ├── css/
@@ -59,66 +82,13 @@ stopwatch-app/
 ├── js/
 │   └── script.js
 ├── assets/
-│   └── icons/
 └── README.md
 ```
 
-## Run Locally
+## Future improvements
 
-This project does not require a framework or build process.
-
-### Option 1 — Open directly
-
-Open:
-
-```text
-index.html
-```
-
-in a web browser.
-
-### Option 2 — Run a local server
-
-Using Python:
-
-```bash
-python -m http.server 8000
-```
-
-Then open:
-
-```text
-http://localhost:8000
-```
-
-## Use Cases
-
-Splitwatch can be used for:
-
-* Workout and exercise timing
-* Sports practice
-* Experiments
-* Productivity sessions
-* Performance testing
-* General time interval measurement
-
-## Future Improvements
-
-Possible future enhancements include:
-
-* Export laps to CSV
-* Save named stopwatch sessions
-* Progressive Web App (PWA) support
-* Automated testing
-* Sound or vibration notifications
-* Multiple stopwatch sessions
-
-## License
-
-This project is licensed under the MIT License.
-get the zip file 
-Overview 
-<img width="1247" height="486" alt="image" src="https://github.com/user-attachments/assets/86c94aba-4b56-445d-918d-fa786bc26e89" />
-<img width="1452" height="571" alt="image" src="https://github.com/user-attachments/assets/8ba5f483-15cb-48a8-9d1d-29c28fdb016a" />
-
-
+- Exportable lap history (CSV)
+- Multiple named timers / sessions
+- PWA support for offline use and installability
+- Unit tests for the time-formatting and lap-calculation logic
+- Sound/vibration cue on lap or on round-minute marks
