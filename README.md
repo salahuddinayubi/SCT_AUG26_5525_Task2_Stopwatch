@@ -38,6 +38,8 @@ soon as the browser delays a callback — Splitwatch stores two things:
 
 - `accumulatedMs`: time already banked from previous run segments
 - `segmentStart`: the `performance.now()` timestamp when the current run
+- <img width="1247" height="486" alt="image" src="https://github.com/user-attachments/assets/21cd40f6-e5d8-4d90-a091-1eb65ddc2b41" />
+
   segment began
 
 On every animation frame, elapsed time is **recomputed** as:
